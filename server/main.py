@@ -1,18 +1,18 @@
-from fastapi import FastAPI
-from fastapi.encoders import jsonable_encoder
-from typing import Union
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer
+from dotenv import load_dotenv
+import os
 import jwt
-from pydantic import BaseModel
+
+from database import *
+from models import User
 from fastapi.middleware.cors import CORSMiddleware
 
-dummy_data = {
-    "username":"admin",
-    "password":"admin"
-}
+# Load environment variables
+load_dotenv()
 
 SECRET_KEY = "cairocoders123456789"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 800
 
 app = FastAPI()
 
@@ -23,19 +23,33 @@ app.add_middleware(
     allow_credentials=True,
     allow_origins=["http://localhost:3000"])
 
-class Loginclass(BaseModel):
-    username: str
-    password: str
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+@app.post("/token")
+async def login_for_access_token(user: User):
+    db_user = get_user(user.username)
+    if db_user and db_user["password"] == user.password:
+        token = jwt.encode({"sub": user.username}, SECRET_KEY, algorithm=ALGORITHM)
+        return {"access_token": token, "token_type": "bearer"}
+    raise HTTPException(status_code=401, detail="Incorrect username or password")
 
 @app.get("/")
-def read_root():
+def read_root(token: str = Depends(oauth2_scheme)):
     return {"Hello": "World"}
 
 @app.post("/login")
-def login(data: Loginclass):
-    data = jsonable_encoder(data)
-    if data['username'] == dummy_data['username'] and data['password'] == dummy_data['password']:
-        encoded_jwt = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
-        return {"token": encoded_jwt, "status": "success"}
+def login(data: User):
+    db_user = get_user(data.username)
+    if db_user and db_user['password'] == data.password:
+        encoded_jwt = jwt.encode({"sub": data.username}, SECRET_KEY, algorithm=ALGORITHM)
+        return {"status": "success","token":encoded_jwt}
     else:
         return {"status": "failed", "message": "Login failed"}
+    
+@app.post("/signup")
+def signup(data: User):
+    db_user = get_user(data.username)
+    if db_user:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    create_user(data)
+    return {"message": "User created successfully"}

@@ -9,13 +9,19 @@ export default function Profile(){
     }
     return(
         <>
-            <div style = {{minHeight: 800, marginTop: 20 }}>
-                <h1>Profile Page</h1>
-                <p>Hi, this is your profile</p>
-                <div>
-                    <button type = 'button' className="btn btn-success btn-lg" onClick= {signOut}>Sign Out</button>
+            <div className="container mt-5">
+            <div className="row justify-content-center">
+                <div className="col-md-6">
+                    <div className="card">
+                        <div className="card-body">
+                            <h2 className="card-title">Profile Page</h2>
+                            <p className="card-text">Hi, this is your profile</p>
+                            <button className="btn btn-success" onClick={signOut}>Sign Out</button>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
              
         </>
     )
