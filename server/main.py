@@ -53,3 +53,4 @@ def signup(data: User):
         raise HTTPException(status_code=400, detail="Username already exists")
     create_user(data)
     return {"message": "User created successfully"}
+
