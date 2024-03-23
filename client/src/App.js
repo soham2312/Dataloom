@@ -7,6 +7,7 @@ import Login from './components/Login.js'
 import Profile from './components/Profile.js'
 import { RequireToken } from './components/Auth.js'
 import Signup from './components/Signup.js';
+import MyDatasets from './components/mydatasets.js';
 
 function App() {
   return (
@@ -28,9 +29,14 @@ function App() {
                     element={
                         <RequireToken>
                             <Profile />
+                            
                         </RequireToken>
                     }
                 />
+                <Route path="/mydatasets" element={
+                <RequireToken>
+                    <MyDatasets />
+                </RequireToken>} />
             </Routes>
         </BrowserRouter>
     </div>
